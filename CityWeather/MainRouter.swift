@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MainRouterProtocol {
-    var navigationController: UINavigationController? {get set}
+    var navigationController: UINavigationController? { get set }
     var assemblyBuilder: MainBuilderProtocol? {get set}
     
     func initialViewController()

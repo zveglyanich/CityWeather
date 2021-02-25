@@ -13,8 +13,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        window = UIWindow.init(frame: UIScreen.main.bounds)
-        window?.windowScene = windowScene
+        window = UIWindow(windowScene: windowScene)
+        
         let navigationController = UINavigationController()
         let assemblyBuilder = MainModelBuilder()
         let router = Router(navigationController: navigationController, assemblyBuilder: assemblyBuilder)

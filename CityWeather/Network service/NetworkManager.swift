@@ -30,8 +30,8 @@ class NetworkManager: NetworkServiceProtocol {
             case .success:
                 let jsonOfCity = JSON(response.value!)
                 
-                let lon = JSON(response.value!)["coord"]["lon"].doubleValue
-                let lat = JSON(response.value!)["coord"]["lat"].doubleValue
+                let lon = JSON(response.value)["coord"]["lon"].doubleValue
+                let lat = JSON(response.value)["coord"]["lat"].doubleValue
                 let paramStringForLatLon = "onecall?lat=\(lat)&lon=\(lon)&exclude=current&appid=\(self.apiKey)&units=\(self.units)"
                 let urlForLatLon = self.baseURL + paramStringForLatLon
                 

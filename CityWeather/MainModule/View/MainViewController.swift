@@ -31,7 +31,7 @@ class MainViewController: UIViewController {
         self.navigationController?.navigationBar.barStyle = UIBarStyle.black
         self.navigationController?.navigationBar.barTintColor = .none
         let addCityBerButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addCity))
-        tableView.delegate = addCityBerButton as? UITableViewDelegate
+        //tableView.delegate = addCityBerButton as? UITableViewDelegate
         navigationItem.rightBarButtonItem = addCityBerButton
         
         view.addSubview(tableView)
