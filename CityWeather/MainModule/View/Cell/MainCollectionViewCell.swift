@@ -8,6 +8,7 @@
 import UIKit
 
 class WeatherCollectionViewCell: UICollectionViewCell {
+    static let cellIdTableViewCell = "cellID"
     
     let tempHourlyLabel : UILabel = {
         let label = UILabel().createLabel(textAlignment: .center, numberOfLines: 3, font: UIFont.systemFont(ofSize: 11.0), textColor: .white)

@@ -7,7 +7,8 @@
 
 import UIKit
 
-class WeatherTableViewCell: UITableViewCell {
+class MainTableViewCell: UITableViewCell {
+    static let cellIdTableViewCell = "cellID"
     
     let cityLabel = UILabel().createLabel(textAlignment: NSTextAlignment.left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
     
@@ -23,7 +24,7 @@ class WeatherTableViewCell: UITableViewCell {
         let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionview.backgroundColor = .none
         collectionview.translatesAutoresizingMaskIntoConstraints = false
-        collectionview.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: "cellId")
+        collectionview.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: WeatherCollectionViewCell.cellIdTableViewCell)
         return collectionview
     }()
     
@@ -38,11 +39,6 @@ class WeatherTableViewCell: UITableViewCell {
     func setCollectionViewDataSourceDelegate(dataSourceDelegate: UICollectionViewDataSource & UICollectionViewDelegate, forRow row: Int) {
         collectionView.delegate = dataSourceDelegate
         collectionView.dataSource = dataSourceDelegate
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        collectionView.reloadData()
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {

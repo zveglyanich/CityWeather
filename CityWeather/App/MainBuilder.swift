@@ -7,25 +7,25 @@
 
 import UIKit
 
-protocol MainBuilderProtocol {
-    func createMainModule(router: MainRouterProtocol) -> UIViewController
-    func createDetailModule(weatherDataModel: CityData?, router: MainRouterProtocol) -> UIViewController
-}
-
-class MainModelBuilder: MainBuilderProtocol {
-    func createMainModule(router: MainRouterProtocol) -> UIViewController {
-        let view = MainViewController()
-        let networService = NetworkManager()
-        let storageService = StorgeRealmManager()
-        let presenter = MainPresenter(view: view, networService: networService, storageService: storageService, router: router)
-        view.presenter = presenter
-        return view
-    }
+enum MainModelBuilder { //Remark #5
     
-    func createDetailModule(weatherDataModel: CityData?, router: MainRouterProtocol) -> UIViewController {
-        let view = DetailViewController()
-        let presenter = DetailPresenter(view: view, weatherDataModel: weatherDataModel, router: router)
-        view.presenter = presenter
-        return view
+    case createMainModule(router: MainRouterProtocol)
+    case createDetailModule(weatherDataModel: CityData?, router: MainRouterProtocol)
+    
+    var viewController: UIViewController {
+        switch self {
+        case .createMainModule (let router):
+            let view = MainViewController()
+            let networService = NetworkManager.shared  //remark #6
+            let storageService = StorgeRealmManager.shared  //remark #6
+            let presenter = MainPresenter(view: view, networService: networService, storageService: storageService, router: router)
+            view.presenter = presenter
+            return view
+        case .createDetailModule (let weatherDataModel, let router):
+            let view = DetailViewController()
+            let presenter = DetailPresenter(view: view, weatherDataModel: weatherDataModel, router: router)
+            view.presenter = presenter
+            return view
+        }
     }
 }

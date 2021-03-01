@@ -7,12 +7,14 @@
 
 import UIKit
 import RealmSwift
+
 //Output
 protocol MainViewprotocol: class {
     func succes()
     func failure(error: Error)
     
 }
+
 //input
 protocol MainViewPresenterProtocol: class {
     init(view: MainViewprotocol, networService: NetworkServiceProtocol, storageService: Storageprotocol, router: MainRouterProtocol)
@@ -59,7 +61,9 @@ class MainPresenter: MainViewPresenterProtocol {
     }
     
     func tapOnTheCellCityWeather(weatherDataModel: CityData?) {
-        router?.showDetailWeather(weatherDataModel: weatherDataModel)
+        if let routerForDetailVC = router {
+            routerForDetailVC.showDetailWeather(builder: MainModelBuilder.createDetailModule(weatherDataModel: weatherDataModel, router: routerForDetailVC))
+        }
     }
     func uploadListOfCities() {
         listOfCities = storageService.realm.objects(CityData.self)

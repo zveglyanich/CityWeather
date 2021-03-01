@@ -8,12 +8,12 @@
 import UIKit
 
 class MainViewController: UIViewController {
-    let cellIdTableViewCell = "cellID"
     var presenter: MainViewPresenterProtocol!
     lazy var numberOfRows = presenter.listOfCities.count
     let alert = Alert()
-    
     let tableView = UITableView().createCustomTableview()
+    let smallSizeHeightCell: CGFloat = 60
+    let bigSizeHeightCell: CGFloat = 160
     
     internal var selectedIndexPath: IndexPath? {
         didSet{
@@ -31,7 +31,6 @@ class MainViewController: UIViewController {
         self.navigationController?.navigationBar.barStyle = UIBarStyle.black
         self.navigationController?.navigationBar.barTintColor = .none
         let addCityBerButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addCity))
-        //tableView.delegate = addCityBerButton as? UITableViewDelegate
         navigationItem.rightBarButtonItem = addCityBerButton
         
         view.addSubview(tableView)
@@ -41,14 +40,14 @@ class MainViewController: UIViewController {
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20.0).isActive = true
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(WeatherTableViewCell.self, forCellReuseIdentifier: cellIdTableViewCell)
+        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: MainTableViewCell.cellIdTableViewCell)
     }
 
     @objc func addCity() {
         numberOfRows +=  1
         let number = IndexPath(row: presenter.listOfCities.count, section: 0)
         tableView.reloadData()
-        let cell = tableView.cellForRow(at: number) as! WeatherTableViewCell
+        let cell = tableView.cellForRow(at: number) as! MainTableViewCell
         cell.tempLabel.text = ""
         cell.cityLabel.text = ""
         cell.iconWeatherImage.image = .none

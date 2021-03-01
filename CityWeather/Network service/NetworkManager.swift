@@ -15,40 +15,59 @@ protocol NetworkServiceProtocol {
 
 class NetworkManager: NetworkServiceProtocol {
     
-    let apiKey = "8596f2c90ca55a77da5105414c00c009"
-    let units = "metric"
-    let baseURL = "https://api.openweathermap.org/data/2.5/"
+    static let shared = NetworkManager() //remark #6
+    
+    private let apiKey = "8596f2c90ca55a77da5105414c00c009"
+    private let units = "metric"
+    private var baseURL: URLComponents = { //remark #8
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = "api.openweathermap.org"
+        return urlComponents
+    }()
+    
+    private init () {} //remark #6
     
     func getRequest(city: String, completion: @escaping (Result<WeatherDataModel?, Error>) -> Void) {
         
-        let paramStringForCity = "weather?q=\(city)&apikey=\(apiKey)&units=\(units)"
-        let urlForCity = baseURL + paramStringForCity
+        var jsonOfCity: JSON?
         
-        guard let urlCity = URL(string: urlForCity)  else { return print ("incorrection URL of City")}
-        AF.request(urlCity).validate().responseJSON { (response) in
+        self.baseURL.path = "/data/2.5/weather"
+        baseURL.queryItems = [URLQueryItem(name: "q", value: city),
+                              URLQueryItem(name: "apikey", value: apiKey),
+                              URLQueryItem(name: "units", value: units)] //remark #8
+        guard let urlCity = baseURL.url?.absoluteString  else {
+            return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 400)))) //remark #9
+        }
+        
+        AF.request(urlCity).validate().responseJSON { [weak self] (response) in //remark #12
             switch response.result {
             case .success:
-                let jsonOfCity = JSON(response.value!)
-                
-                let lon = JSON(response.value)["coord"]["lon"].doubleValue
-                let lat = JSON(response.value)["coord"]["lat"].doubleValue
-                let paramStringForLatLon = "onecall?lat=\(lat)&lon=\(lon)&exclude=current&appid=\(self.apiKey)&units=\(self.units)"
-                let urlForLatLon = self.baseURL + paramStringForLatLon
-                
-                guard let urlLatLon = URL(string: urlForLatLon)  else { return print ("incorrection URL of lat/lon City")}
-                AF.request(urlLatLon).validate().responseJSON { response in
-                    switch response.result {
-                    case .success:
-                        let json = JSON(response.value!)
-                        let weatherDataModel = WeatherDataModel(jsonOfCity: jsonOfCity, jsonOfHourlyDailyWeather: json)
-                        completion(.success(weatherDataModel))
-                    case .failure(let error): completion(.failure(error))
-                    }
-                }
+                jsonOfCity = JSON(response.value)
+            case .failure(let error): completion(.failure(error))
+            }
+        }
+        
+        self.baseURL.path = "/data/2.5/onecall"
+        self.baseURL.queryItems = [URLQueryItem(name: "lat", value: String(jsonOfCity!["coord"]["lat"].doubleValue)),
+                                   URLQueryItem(name: "lon", value: String(jsonOfCity!["coord"]["lon"].doubleValue)),
+                                   URLQueryItem(name: "exclude", value: "current"),
+                                   URLQueryItem(name: "appid", value: self.apiKey),
+                                   URLQueryItem(name: "units", value: self.units)] //remark #8
+        guard let urlLatLon = self.baseURL.url?.absoluteString  else {
+            return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 400)))) //remark #9
+        }
+        
+        
+        AF.request(urlLatLon).validate().responseJSON { [weak self] (response) in //remark #12
+            switch response.result {
+            case .success:
+                let json = JSON(response.value)
+                let weatherDataModel = WeatherDataModel(jsonOfCity: jsonOfCity!, jsonOfHourlyDailyWeather: json)
+                completion(.success(weatherDataModel))
             case .failure(let error): completion(.failure(error))
             }
         }
     }
-    
 }
 

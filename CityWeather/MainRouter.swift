@@ -9,32 +9,28 @@ import UIKit
 
 protocol MainRouterProtocol {
     var navigationController: UINavigationController? { get set }
-    var assemblyBuilder: MainBuilderProtocol? {get set}
     
-    func initialViewController()
-    func showDetailWeather(weatherDataModel: CityData?)
+    func initialViewController(builder: MainModelBuilder) //Remark #3,5
+    func showDetailWeather(builder: MainModelBuilder) //Remark #5
 }
 
 class Router: MainRouterProtocol {
     var navigationController: UINavigationController?
-    var assemblyBuilder: MainBuilderProtocol?
     
-    init(navigationController: UINavigationController, assemblyBuilder: MainBuilderProtocol) {
+    init(navigationController: UINavigationController) {
         self.navigationController = navigationController
-        self.assemblyBuilder = assemblyBuilder
     }
-    func initialViewController() {
+    
+    func initialViewController(builder: MainModelBuilder) { //Remark #3,5
         if let navigationController = navigationController {
-            guard let mainViewController = assemblyBuilder?.createMainModule(router: self) else {return}
+            let mainViewController = builder.viewController //Remark #3,5
             navigationController.viewControllers = [mainViewController]
         }
     }
     
-    func showDetailWeather(weatherDataModel: CityData?) {
-        if let navigationController = navigationController {
-            guard let detailViewController = assemblyBuilder?.createDetailModule(weatherDataModel: weatherDataModel, router: self) else {return}
-            navigationController.pushViewController(detailViewController, animated: true)
-        }
+    func showDetailWeather(builder: MainModelBuilder) { //Remark #5
+            let detailViewController = builder.viewController //Remark #5
+            navigationController?.pushViewController(detailViewController, animated: true) //Remark #15
     }
     
 }
