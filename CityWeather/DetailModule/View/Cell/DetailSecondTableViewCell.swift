@@ -9,13 +9,15 @@ import UIKit
 
 class DetailSecondTableViewCell: UITableViewCell {
     
+    static let cellId = "DetailSecondTableViewCell" //Remark #36
+    
     let tempCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionview.backgroundColor = .clear
         collectionview.translatesAutoresizingMaskIntoConstraints = false
-        collectionview.register(DetailSecondCollectionViewCell.self, forCellWithReuseIdentifier: "cellId")
+        collectionview.register(DetailSecondCollectionViewCell.self, forCellWithReuseIdentifier: DetailSecondCollectionViewCell.cellId)
         return collectionview
     }()
     
@@ -24,20 +26,13 @@ class DetailSecondTableViewCell: UITableViewCell {
         tempCollectionView.dataSource = dataSourceDelegate
     }
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        tempCollectionView.reloadData()
-    }
-    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         addSubview(tempCollectionView)
         addConstraintsWithFormat("V:|-10-[v0]-10-|", views: tempCollectionView)
         addConstraintsWithFormat("H:|-20-[v0]-10-|", views: tempCollectionView)
-        
     }
 }
 
 class DetailSecondCollectionViewCell: WeatherCollectionViewCell {
-    
 }

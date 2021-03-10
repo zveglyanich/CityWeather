@@ -9,8 +9,8 @@ import UIKit
 import SwiftyJSON
 
 enum FormatDate {
-    case day
-    case time
+    case dayFormat
+    case timeFormat
 }
 
 struct WeatherDataModel {
@@ -29,28 +29,33 @@ struct WeatherDataModel {
     var hourlyWeather: [(time: String, temp: Int, weather: String)]
     var dailyWeather: [(day: String, tempDay: Int, tempNight: Int, weather: String)]
     
+    static let timeStyleDateFormatter = DateFormatter().createCustomDateFormatter(style: .timeFormat) //Remark #33
+    static let dateStyleDateFormatter = DateFormatter().createCustomDateFormatter(style: .dayFormat) //Remark #33
+    
     init(jsonOfCity: JSON, jsonOfHourlyDailyWeather: JSON) {
         
-        let temperature = jsonOfCity["main"]["temp"].intValue
-        let tempFeelsLike = jsonOfCity["main"]["feels_like"].intValue
-        let tempMax = jsonOfCity["main"]["temp_max"].intValue
-        let tempMin = jsonOfCity["main"]["temp_min"].intValue
+        let mainData = jsonOfCity["main"]
+        
+        let temperature = mainData["temp"].intValue
+        let tempFeelsLike = mainData["feels_like"].intValue
+        let tempMax = mainData["temp_max"].intValue
+        let tempMin = mainData["temp_min"].intValue
         let city = jsonOfCity["name"].stringValue
-        let humidity = jsonOfCity["main"]["humidity"].intValue
+        let humidity = mainData["humidity"].intValue
         let windDegree = jsonOfCity["wind"]["deg"].intValue
         let windSpeed = jsonOfCity["wind"]["speed"].floatValue
         let condition = jsonOfCity["weather"][0]["id"].intValue
         let description = jsonOfCity["weather"][0]["description"].stringValue
 
         let hourlyWeather : [(time: String, temp: Int, weather: String)] = jsonOfHourlyDailyWeather["hourly"].compactMap { (_, JSON) -> (time: String, temp: Int, weather: String) in
-            let weatherTime = WeatherDataModel.createTimeResult(result: JSON["dt"].intValue, inFormate: .time)
+            let weatherTime = WeatherDataModel.createTimeResult(result: JSON["dt"].intValue, inFormate: .timeFormat)
             let weatherTemp = JSON["temp"].intValue
             let weatherCondition = WeatherDataModel.updateWeatherIcon(condition: JSON["weather"][0]["id"].intValue)
             let hourlydictionary = (time: weatherTime, temp: weatherTemp, weather: weatherCondition)
             return hourlydictionary
         }
         let dailyWeather : [(day: String, tempDay: Int, tempNight: Int, weather: String)] = jsonOfHourlyDailyWeather["daily"].compactMap { (_, JSON) -> (day: String, tempDay: Int, tempNight: Int, weather: String) in
-            let day = WeatherDataModel.createTimeResult(result: JSON["dt"].intValue, inFormate: .day)
+            let day = WeatherDataModel.createTimeResult(result: JSON["dt"].intValue, inFormate: .dayFormat)
             let tempDay = JSON["temp"]["day"].intValue
             let tempNight = JSON["temp"]["night"].intValue
             let weather = WeatherDataModel.updateWeatherIcon(condition: JSON["weather"][0]["id"].intValue)
@@ -72,25 +77,19 @@ struct WeatherDataModel {
         self.windDegree = WeatherDataModel.updateWindDegree(condition: windDegree)
     }
     
-    static func createTimeResult (result: Int, inFormate: FormatDate) -> String {
+    static func createTimeResult (result: Int, inFormate: FormatDate) -> String { //Remark #33
         let date = Date(timeIntervalSince1970: Double(result))
-        let dateFormat = DateFormatter()
-        dateFormat.timeZone = .current
-        if inFormate == .day {
-            dateFormat.timeStyle = DateFormatter.Style.none
-            dateFormat.dateStyle = DateFormatter.Style.full
-            let dateString = dateFormat.string(from: date)
-            let endIndex = dateString.range(of: ",", options: .caseInsensitive)!.lowerBound
-            return dateString.substring(to: endIndex)
-        } else {
-            dateFormat.timeStyle = DateFormatter.Style.short
-            dateFormat.dateStyle = DateFormatter.Style.none
-            let stringDate = dateFormat.string(from: date)
-            let index = stringDate.index(stringDate.endIndex, offsetBy: -6)
-            return stringDate.substring(to: index)
+        switch inFormate {
+        case .dayFormat:
+            let dateString = dateStyleDateFormatter.string(from: date)
+            let startIndex = dateString.range(of: ",", options: .caseInsensitive)!.lowerBound
+            return String(dateString[startIndex...])
+        case .timeFormat:
+            let stringDate = timeStyleDateFormatter.string(from: date)
+            let endindex = stringDate.index(stringDate.endIndex, offsetBy: -6)
+            return String(stringDate[...endindex])
         }
     }
-    
     static func updateWeatherIcon(condition: Int?) -> String {
         guard let condition = condition else { return "warm"}
         switch (condition) {

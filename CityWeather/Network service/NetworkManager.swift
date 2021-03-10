@@ -36,38 +36,57 @@ class NetworkManager: NetworkServiceProtocol {
         baseURL.queryItems = [URLQueryItem(name: "q", value: city),
                               URLQueryItem(name: "apikey", value: apiKey),
                               URLQueryItem(name: "units", value: units)] //remark #8
-        guard let urlCity = baseURL.url?.absoluteString  else {
+        guard let urlCity = baseURL.url  else {
             return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 400)))) //remark #9
         }
         
-        AF.request(urlCity).validate().responseJSON { [weak self] (response) in //remark #12
+        AF.request(urlCity).validate().responseJSON { [weak self] response in
             switch response.result {
             case .success:
-                jsonOfCity = JSON(response.value)
-            case .failure(let error): completion(.failure(error))
+                guard response.value != nil else { //remark #11
+                    return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 500))))
+                }
+                jsonOfCity = JSON(response.value!)
+                getRequestFromLatLon()
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
         
-        self.baseURL.path = "/data/2.5/onecall"
-        self.baseURL.queryItems = [URLQueryItem(name: "lat", value: String(jsonOfCity!["coord"]["lat"].doubleValue)),
-                                   URLQueryItem(name: "lon", value: String(jsonOfCity!["coord"]["lon"].doubleValue)),
-                                   URLQueryItem(name: "exclude", value: "current"),
-                                   URLQueryItem(name: "appid", value: self.apiKey),
-                                   URLQueryItem(name: "units", value: self.units)] //remark #8
-        guard let urlLatLon = self.baseURL.url?.absoluteString  else {
-            return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 400)))) //remark #9
-        }
-        
-        
-        AF.request(urlLatLon).validate().responseJSON { [weak self] (response) in //remark #12
-            switch response.result {
-            case .success:
-                let json = JSON(response.value)
-                let weatherDataModel = WeatherDataModel(jsonOfCity: jsonOfCity!, jsonOfHourlyDailyWeather: json)
-                completion(.success(weatherDataModel))
-            case .failure(let error): completion(.failure(error))
+        func getRequestFromLatLon () {   //remark #12
+            
+            self.baseURL.path = "/data/2.5/onecall"
+            guard let lat = jsonOfCity?["coord"]["lat"].doubleValue,  //remark #11
+                  let lon = jsonOfCity?["coord"]["lon"].doubleValue
+            else {
+                return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 500))))
+            }
+            self.baseURL.queryItems = [URLQueryItem(name: "lat", value: String(lat)),
+                                       URLQueryItem(name: "lon", value: String(lon)),
+                                       URLQueryItem(name: "exclude", value: "current"),
+                                       URLQueryItem(name: "appid", value: self.apiKey),
+                                       URLQueryItem(name: "units", value: self.units)] //remark #8
+            guard let urlLatLon = self.baseURL.url  else {
+                return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 400)))) //remark #9
+            }
+            
+            AF.request(urlLatLon).validate().responseJSON { [weak self] response in //remark #12
+                switch response.result {
+                case .success:
+                    guard response.value != nil else {  //remark #11
+                        return completion(.failure(AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 500))))
+                    }
+                    let json = JSON(response.value!)
+                    let weatherDataModel = WeatherDataModel(jsonOfCity: jsonOfCity!, jsonOfHourlyDailyWeather: json)
+                    completion(.success(weatherDataModel))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
             }
         }
     }
 }
 
+
+
+ 

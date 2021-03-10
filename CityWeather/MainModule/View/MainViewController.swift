@@ -10,7 +10,6 @@ import UIKit
 class MainViewController: UIViewController {
     var presenter: MainViewPresenterProtocol!
     lazy var numberOfRows = presenter.listOfCities.count
-    let alert = Alert()
     let tableView = UITableView().createCustomTableview()
     let smallSizeHeightCell: CGFloat = 60
     let bigSizeHeightCell: CGFloat = 160
@@ -28,8 +27,10 @@ class MainViewController: UIViewController {
         let backgroundImage = UIImageView(frame: UIScreen.main.bounds)
         backgroundImage.image = UIImage(named: "background")
         self.view.insertSubview(backgroundImage, at: 0)
+        
         self.navigationController?.navigationBar.barStyle = UIBarStyle.black
         self.navigationController?.navigationBar.barTintColor = .none
+        
         let addCityBerButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addCity))
         navigationItem.rightBarButtonItem = addCityBerButton
         
@@ -38,9 +39,10 @@ class MainViewController: UIViewController {
         tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 20.0).isActive = true
         tableView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20.0).isActive = true
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20.0).isActive = true
+        
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: MainTableViewCell.cellIdTableViewCell)
+        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: MainTableViewCell.cellId)
     }
 
     @objc func addCity() {
@@ -59,12 +61,12 @@ class MainViewController: UIViewController {
     @objc func editingEnded(_ textField: UITextField) {
         let cityName = presenter.listOfCities.filter{ $0.city == textField.text}
         if textField.text != "" && cityName.count == 0 {
-            presenter.getWeather(city: textField.text!)
+            presenter.createRequestToGetData(fromText: textField.text!)
             textField.removeFromSuperview()
-        } else {
-            numberOfRows = numberOfRows - 1
-            succes()
         }
+            numberOfRows -= 1
+            tableView.reloadData()
+        
     }
 }
 
@@ -74,11 +76,29 @@ extension MainViewController: MainViewprotocol {
             numberOfRows -= 1
             tableView.reloadData()
         }
-        present(alert.showAlert(error: error), animated: true, completion: nil)
+        var title = ""
+        var message = ""
+        if let response = error.asAFError?.responseCode {
+            switch response {
+            case 400...499:
+                title = "Incorrect request"
+                message = "Please enter the correct city name"
+            case 500...599:
+                title = "Internal Server Error"
+                message = "Send your request later"
+            default:
+                message = "Uknown Error"
+            }
+        }
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+        alert.addAction(okAction)
+        present(alert, animated: true, completion: nil)
         
     }
     
     func succes() {
+        numberOfRows +=  1
         tableView.reloadData()
     }
     

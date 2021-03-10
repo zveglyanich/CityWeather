@@ -8,22 +8,18 @@
 import UIKit
 import RealmSwift
 
-//Output
 protocol MainViewprotocol: class {
     func succes()
     func failure(error: Error)
-    
 }
 
-//input
 protocol MainViewPresenterProtocol: class {
     init(view: MainViewprotocol, networService: NetworkServiceProtocol, storageService: Storageprotocol, router: MainRouterProtocol)
-    func getWeather(city: String)
+    func createRequestToGetData(fromText: String)
     func uploadListOfCities()
-    func saveListOfCities(city: String, tempNow: Int, tempFeelsLike: Int, tempMax: Int, tempMin: Int, humidity: Int, windDegree: String, windSpeed: Float, weatherIconeName: String, descriptionWeather: String, condition: Int, hourlyWeather: [(time: String, temp: Int, weather: String)], dailyWeather: [(day: String, tempDay: Int, tempNight: Int, weather: String)])
     func deleteCityInListOfCities(indexPath: IndexPath)
-    var weatherOfCity: WeatherDataModel? {get set}
-    var listOfCities: Results<CityData>! {get}
+    var weatherOfCity: WeatherDataModel? { get set }
+    var listOfCities: Results<CityData>! { get }
     func tapOnTheCellCityWeather(weatherDataModel: CityData?)
 }
 
@@ -44,15 +40,15 @@ class MainPresenter: MainViewPresenterProtocol {
         self.uploadListOfCities()
     }
     
-    func getWeather(city: String) {
-        networService.getRequest(city: city) { [weak self] weatherData in
+    func createRequestToGetData(fromText: String) { //Remark #21
+        networService.getRequest(city: fromText) { [weak self] weatherData in
             guard let self = self else {return }
             DispatchQueue.main.async {
                 switch weatherData {
                 case .success(let result):
                     self.weatherOfCity = result
-                    self.updateValues()
                     self.uploadListOfCities()
+                    self.updateValues()
                     self.view?.succes()
                 case .failure(let error): self.view?.failure(error: error)
                 }
@@ -66,55 +62,60 @@ class MainPresenter: MainViewPresenterProtocol {
         }
     }
     func uploadListOfCities() {
-        listOfCities = storageService.realm.objects(CityData.self)
-    }
-    func saveListOfCities(city: String,
-                          tempNow: Int,
-                          tempFeelsLike: Int,
-                          tempMax: Int,
-                          tempMin: Int,
-                          humidity: Int,
-                          windDegree: String,
-                          windSpeed: Float,
-                          weatherIconeName: String,
-                          descriptionWeather: String,
-                          condition: Int,
-                          hourlyWeather: [(time: String, temp: Int, weather: String)],
-                          dailyWeather: [(day: String, tempDay: Int, tempNight: Int, weather: String)]) {
-        let cityHourlyWeather =  List<CityHourlyWeather>()
-        for index in 0..<hourlyWeather.count {
-            let elementHourlyWeather = CityHourlyWeather(value: [hourlyWeather[index].time, hourlyWeather[index].temp, hourlyWeather[index].weather])
-            cityHourlyWeather.append(elementHourlyWeather)
-        }
-        let cityDailyWeather =  List<CityDailyWeather>()
-        for index in 0..<dailyWeather.count {
-            let elementDailyWeather = CityDailyWeather(value: [dailyWeather[index].day, dailyWeather[index].tempDay, dailyWeather[index].tempNight, dailyWeather[index].weather])
-            cityDailyWeather.append(elementDailyWeather)
-        }
-        let id = listOfCities.count
-        let cityData = CityData(value: [id, city, tempNow, tempFeelsLike, tempMax, tempMin, humidity, windDegree, windSpeed, weatherIconeName, descriptionWeather, condition, cityHourlyWeather, cityDailyWeather])
-        storageService.saveCity(cityData)
-        uploadListOfCities()
+        listOfCities = storageService.realm?.objects(CityData.self)
+
     }
     func deleteCityInListOfCities(indexPath: IndexPath) {
-        storageService.deleteCity(listOfCities[indexPath.row])
+        do {
+            try storageService.deleteCity(listOfCities[indexPath.row])
+        } catch let error {
+            view?.failure(error: error)
+        }
+        
+        
         
     }
     func updateValues() {
         if let data = weatherOfCity {
-            saveListOfCities(city: data.city,
-                             tempNow: data.tempNow,
-                             tempFeelsLike: data.tempFeelsLike,
-                             tempMax: data.tempMax,
-                             tempMin: data.tempMin,
-                             humidity: data.humidity,
-                             windDegree: data.windDegree,
-                             windSpeed: data.windSpeed,
-                             weatherIconeName: data.weatherIconeName,
-                             descriptionWeather: data.description,
-                             condition: data.condition,
-                             hourlyWeather: data.hourlyWeather,
-                             dailyWeather: data.dailyWeather)
+    
+            let datacityHourlyWeather =  List<CityHourlyWeather>()
+            for index in 0..<data.hourlyWeather.count {
+                let elementHourlyWeather = CityHourlyWeather(value: [data.hourlyWeather[index].time,
+                                                                     data.hourlyWeather[index].temp,
+                                                                     data.hourlyWeather[index].weather])
+                datacityHourlyWeather.append(elementHourlyWeather)
+            }
+    
+            let datacityDailyWeather =  List<CityDailyWeather>()
+            for index in 0..<data.dailyWeather.count {
+                let elementDailyWeather = CityDailyWeather(value: [data.dailyWeather[index].day,
+                                                                   data.dailyWeather[index].tempDay,
+                                                                   data.dailyWeather[index].tempNight,
+                                                                   data.dailyWeather[index].weather])
+                datacityDailyWeather.append(elementDailyWeather)
+            }
+    
+            let dataID = listOfCities.count
+            let cityData = CityData(value: [dataID,
+                                            data.city,
+                                            data.tempNow,
+                                            data.tempFeelsLike,
+                                            data.tempMax,
+                                            data.tempMin,
+                                            data.humidity,
+                                            data.windDegree,
+                                            data.windSpeed,
+                                            data.weatherIconeName,
+                                            data.description,
+                                            data.condition,
+                                            datacityHourlyWeather,
+                                            datacityDailyWeather])
+            do {
+                try storageService.saveCity(cityData)
+            } catch let error {
+                view?.failure(error: error)
+            }
+            uploadListOfCities()
         }
     }
 }

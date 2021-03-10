@@ -8,15 +8,15 @@
 import UIKit
 
 class MainTableViewCell: UITableViewCell {
-    static let cellIdTableViewCell = "cellID"
+    static let cellId = "cellID"
     
-    let cityLabel = UILabel().createLabel(textAlignment: NSTextAlignment.left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
+    let cityLabel = UILabel().createCustomLabel(textAlignment: NSTextAlignment.left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
     
-    let cityTextField = UITextField().translatesAutoresizingMask()
+    let cityTextField = UITextField().createTextFieldWithTranslatesAutoresizingMask()
     
-    let iconWeatherImage = UIImageView().translatesAutoresizingMask()
+    let iconWeatherImage = UIImageView().createImageViewWithTranslatesAutoresizingMask()
     
-    let tempLabel = UILabel().createLabel(textAlignment: NSTextAlignment.left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
+    let tempLabel = UILabel().createCustomLabel(textAlignment: NSTextAlignment.left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
     
     let collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -24,17 +24,11 @@ class MainTableViewCell: UITableViewCell {
         let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionview.backgroundColor = .none
         collectionview.translatesAutoresizingMaskIntoConstraints = false
-        collectionview.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: WeatherCollectionViewCell.cellIdTableViewCell)
+        collectionview.register(WeatherCollectionViewCell.self, forCellWithReuseIdentifier: WeatherCollectionViewCell.cellId)
         return collectionview
     }()
     
-    let weatherDescriptionButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("More details >", for: .normal)
-        button.setTitleColor(#colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
+    let weatherDescriptionButton = UIButton().createCustomButton(title: "More details >", for: .normal, color: #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), for: .normal)
     
     func setCollectionViewDataSourceDelegate(dataSourceDelegate: UICollectionViewDataSource & UICollectionViewDelegate, forRow row: Int) {
         collectionView.delegate = dataSourceDelegate

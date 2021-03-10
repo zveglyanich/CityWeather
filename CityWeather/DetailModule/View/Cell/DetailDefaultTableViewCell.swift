@@ -9,9 +9,11 @@ import UIKit
 
 class DetailDefaultTableViewCell: UITableViewCell {
 
-    let nameLabel = UILabel().createLabel(textAlignment: .left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 13.0), textColor: .white)
+    static let cellId = "DetailDefaultTableViewCell" //Remark #36
+    
+    let nameLabel = UILabel().createCustomLabel(textAlignment: .left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 13.0), textColor: .white)
 
-    let valueLabel = UILabel().createLabel(textAlignment: .left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
+    let valueLabel = UILabel().createCustomLabel(textAlignment: .left, numberOfLines: 1, font: UIFont.systemFont(ofSize: 18.0), textColor: .white)
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .default, reuseIdentifier: reuseIdentifier)

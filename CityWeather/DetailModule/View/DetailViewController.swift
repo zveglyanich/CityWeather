@@ -10,8 +10,7 @@ import UIKit
 class DetailViewController: UIViewController {
     
     var presenter: DetailViewPresenterProtocol!
-    let cellID = ["First", "Second", "Third", "Default"]
-    let numberOfRowsInSection = 5
+    private let numberOfRowsInSection = 5
     var weatherCity: CityData?
     
     let tableView = UITableView().createCustomTableview()
@@ -20,6 +19,7 @@ class DetailViewController: UIViewController {
         presenter.setWeather()
         view.backgroundColor = .none
         tableView.tableFooterView = UIView()
+        
         let backgroundImage = UIImageView(frame: UIScreen.main.bounds)
         backgroundImage.image = UIImage(named: "background")
         self.view.insertSubview(backgroundImage, at: 0)
@@ -27,10 +27,11 @@ class DetailViewController: UIViewController {
         createTableViewConstraint()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(DetailFirstTableViewCell.self, forCellReuseIdentifier: cellID[0])
-        tableView.register(DetailSecondTableViewCell.self, forCellReuseIdentifier: cellID[1])
-        tableView.register(DetailThirdTableViewCell.self, forCellReuseIdentifier: cellID[2])
-        tableView.register(DetailDefaultTableViewCell.self, forCellReuseIdentifier: cellID[3])
+        
+        tableView.register(DetailFirstTableViewCell.self, forCellReuseIdentifier: DetailFirstTableViewCell.cellId) //Remark #36
+        tableView.register(DetailSecondTableViewCell.self, forCellReuseIdentifier: DetailSecondTableViewCell.cellId) //Remark #36
+        tableView.register(DetailThirdTableViewCell.self, forCellReuseIdentifier: DetailThirdTableViewCell.cellId) //Remark #36
+        tableView.register(DetailDefaultTableViewCell.self, forCellReuseIdentifier: DetailDefaultTableViewCell.cellId) //Remark #36
     }
     private func createTableViewConstraint() {
         view.addSubview(tableView)
@@ -65,64 +66,77 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.row {
         case 0:
-            let cell = tableView.dequeueReusableCell(withIdentifier: cellID[0], for: indexPath) as! DetailFirstTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: DetailFirstTableViewCell.cellId, for: indexPath) as! DetailFirstTableViewCell //Remark #36
             cell.selectionStyle = .none
+            
             if let weather = weatherCity {
                 cell.cityAndFeelsLikeLabel.text = "\(weather.city)\nFeels like \(weather.tempFeelsLike)°"
                 cell.iconWeatherImage.image = UIImage(named: weather.weatherIconeName)
                 cell.descriptionLabel.text = weather.descriptionWeather
             }
             return cell
+            
         case 1:
-            let cell = tableView.dequeueReusableCell(withIdentifier: cellID[1], for: indexPath) as! DetailSecondTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: DetailSecondTableViewCell.cellId, for: indexPath) as! DetailSecondTableViewCell //Remark #36
             cell.selectionStyle = .none
             cell.setCollectionViewDataSourceDelegate(dataSourceDelegate: self, forRow: 1)
             return cell
-        case 2:  let cell = tableView.dequeueReusableCell(withIdentifier: cellID[2], for: indexPath) as! DetailThirdTableViewCell
+            
+        case 2:
+            let cell = tableView.dequeueReusableCell(withIdentifier: DetailThirdTableViewCell.cellId, for: indexPath) as! DetailThirdTableViewCell //Remark #36
             cell.selectionStyle = .none
+            
             if let weather = weatherCity {
-                for indexSubView in 0..<7 {
-                    let subviewStackView = cell.stackView.arrangedSubviews[indexSubView] as! UIStackView
-                    let labelDay = subviewStackView.arrangedSubviews[0] as! UILabel
-                    let iconWeather = subviewStackView.arrangedSubviews[1] as! UIImageView
-                    let labelTempDay = subviewStackView.arrangedSubviews[2] as! UILabel
-                    let labelTempNight = subviewStackView.arrangedSubviews[3] as! UILabel
+                for index in 0...DetailThirdTableViewCell.countOfStringOnStackView { //Remark #35, 37
+                    let labelDay = cell.views[index].subviews[0] as! UILabel
+                    let imageviewIconWeather = cell.views[index].subviews[1] as! UIImageView
+                    let labelTempDay = cell.views[index].subviews[2] as! UILabel
+                    let labelTempNight = cell.views[index].subviews[3] as! UILabel
                     
-                    labelDay.text = weather.dailyWeather[indexSubView].dailyWeatherDay
-                    iconWeather.image = UIImage(named: weather.dailyWeather[indexSubView].dailyWeatherIcon)
-                    labelTempDay.text = "\(weather.dailyWeather[indexSubView].dailyWeatherTempDay)°"
-                    labelTempNight.text = "\(weather.dailyWeather[indexSubView].dailyWeatherTempNight)°"
+                    labelDay.text = weather.dailyWeather[index].dailyWeatherDay
+                    imageviewIconWeather.image = UIImage(named: weather.dailyWeather[index].dailyWeatherIcon)
+                    labelTempDay.text = "\(weather.dailyWeather[index].dailyWeatherTempDay)°"
+                    labelTempNight.text = "\(weather.dailyWeather[index].dailyWeatherTempNight)°"
                 }
             }
             return cell
-        case 3: let cell = tableView.dequeueReusableCell(withIdentifier: cellID[3], for: indexPath) as! DetailDefaultTableViewCell
+            
+        case 3:
+            let cell = tableView.dequeueReusableCell(withIdentifier: DetailDefaultTableViewCell.cellId, for: indexPath) as! DetailDefaultTableViewCell //Remark #36
             cell.selectionStyle = .none
             if let weather = weatherCity {
                 cell.nameLabel.text = "HUMIDITY"
                 cell.valueLabel.text = "\(weather.humidity)%"
             }
             return cell
-        case 4: let cell = tableView.dequeueReusableCell(withIdentifier: cellID[3], for: indexPath) as! DetailDefaultTableViewCell
+            
+        case 4:
+            let cell = tableView.dequeueReusableCell(withIdentifier: DetailDefaultTableViewCell.cellId, for: indexPath) as! DetailDefaultTableViewCell //Remark #36
             cell.selectionStyle = .none
             if let weather = weatherCity {
                 cell.nameLabel.text = "WIND"
                 cell.valueLabel.text = "\(weather.windDegree) \(weather.windSpeed) m/s"
             }
             return cell
+            
         default:  return UITableViewCell()
         }
     }
 }
 
 extension DetailViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width/8, height: collectionView.frame.height)
     }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return weatherCity?.hourlyWeather.count == nil ? 0 : weatherCity!.hourlyWeather.count
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellId", for: indexPath) as! WeatherCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailSecondCollectionViewCell.cellId, for: indexPath) as! DetailSecondCollectionViewCell
+        
         if let weatherData = weatherCity {
             let weatherHourly = weatherData.hourlyWeather[indexPath.row]
             let time = weatherHourly.hourlyWeatherTime
@@ -134,3 +148,5 @@ extension DetailViewController: UICollectionViewDelegateFlowLayout, UICollection
         return cell
     }
 }
+
+

@@ -2,16 +2,7 @@
   "images" : [
     {
       "filename" : "papers.co-sj68-moody-dark-blue-purple-sad-gradation-blur-34-iphone6-plus-wallpaper.jpg",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "universal",
-      "scale" : "3x"
+      "idiom" : "universal"
     }
   ],
   "info" : {

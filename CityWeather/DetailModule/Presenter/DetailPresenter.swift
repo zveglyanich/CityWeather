@@ -7,12 +7,10 @@
 
 import Foundation
 
-//Input protocol
 protocol DetailViewProtocol: class {
     func setWeatherOfCity(weatherDataModel: CityData?)
 }
 
-//Output protocol
 protocol DetailViewPresenterProtocol: class  {
     init (view: DetailViewProtocol, weatherDataModel: CityData?, router: MainRouterProtocol)
     func setWeather()

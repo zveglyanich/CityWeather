@@ -13,7 +13,7 @@ extension MainViewController: UITableViewDataSource, UITableViewDelegate {
         return presenter.listOfCities.count == 0 || numberOfRows != 0 ? numberOfRows : presenter.listOfCities.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.cellIdTableViewCell, for: indexPath) as! MainTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewCell.cellId, for: indexPath) as! MainTableViewCell
         
         cell.setCollectionViewDataSourceDelegate(self, forRow: indexPath.row)
         cell.cityTextField.delegate = self
@@ -85,7 +85,7 @@ extension MainViewController: UICollectionViewDelegateFlowLayout, UICollectionVi
     
     //MARK: fix correct view on cell collectionview about indexpath
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WeatherCollectionViewCell.cellIdTableViewCell, for: indexPath) as! WeatherCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WeatherCollectionViewCell.cellId, for: indexPath) as! WeatherCollectionViewCell
         let weatherHourly = presenter.listOfCities[collectionView.tag].hourlyWeather[indexPath.row]
         let time = weatherHourly.hourlyWeatherTime
         let temp = weatherHourly.hourlyWeatherTemp

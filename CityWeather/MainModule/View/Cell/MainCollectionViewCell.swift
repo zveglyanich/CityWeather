@@ -8,16 +8,16 @@
 import UIKit
 
 class WeatherCollectionViewCell: UICollectionViewCell {
-    static let cellIdTableViewCell = "cellID"
+    static let cellId = "cellID"
     
     let tempHourlyLabel : UILabel = {
-        let label = UILabel().createLabel(textAlignment: .center, numberOfLines: 3, font: UIFont.systemFont(ofSize: 11.0), textColor: .white)
+        let label = UILabel().createCustomLabel(textAlignment: .center, numberOfLines: 3, font: UIFont.systemFont(ofSize: 11.0), textColor: .white)
         label.contentMode = .scaleAspectFill
         label.clipsToBounds = true
         return label
     }()
     
-    let iconHourlyWeatherImage = UIImageView().translatesAutoresizingMask()
+    let iconHourlyWeatherImage = UIImageView().createImageViewWithTranslatesAutoresizingMask()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
